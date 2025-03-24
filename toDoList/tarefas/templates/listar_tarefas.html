@@ -1,10 +1,75 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Tarefas</title>
-    <link rel="icon" href="toDoLogo.png" type="image/x-icon">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+        }
+
+        .tarefas_em_andamento, .tarefas_concluidas, .tarefas_nao_feitas {
+            background: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .tarefas_em_andamento {
+            border-left: 5px solid #f39c12;
+        }
+
+        .tarefas_concluidas {
+            border-left: 5px solid #28a745;
+        }
+
+        .tarefas_nao_feitas {
+            border-left: 5px solid #dc3545;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 3px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        form {
+            text-align: center;
+        }
+
+        #atualizarStatusBtn {
+            background-color: #28a745;
+        }
+
+        #atualizarStatusBtn:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
     <h1>Em andamento:</h1>
@@ -12,30 +77,31 @@
         {% csrf_token %}
         {% for tarefa in tarefas %}
             {% if tarefa.status == 'em_andamento' %}
-                <div class="tarefas_em_andamento" style="background-color: yellow; padding: 20px; margin-bottom: 20px">
-                    <input type="checkbox" name="tarefa_ids" value="{{ tarefa.id }}" class="selecionar"> Concluir
-                    <br>
-                    <button type="button" onclick="window.location.href='{% url 'excluir_tarefa' tarefa.id %}'">&#128465;</button>
-                    <button type="button" onclick="window.location.href='{% url 'editar_tarefa' tarefa.id %}'">&#9999;</button>
-                    <p>{{ tarefa.materia }}</p>
-                    <p>{{ tarefa.descricao }}</p>
-                    <p>{{ tarefa.prazo }}</p>
+                <div class="tarefas_em_andamento">
+                    <label>
+                        <input type="checkbox" name="tarefa_ids" value="{{ tarefa.id }}" class="selecionar"> Concluir
+                    </label>
+                    <button type="button" onclick="window.location.href=`{% url 'excluir_tarefa' tarefa.id %}`">Excluir</button>
+                    <button type="button" onclick="window.location.href=`{% url 'editar_tarefa' tarefa.id %}`">Editar</button>
+                    <p>Matéria: {{ tarefa.materia }}</p>
+                    <p>Descrição: {{ tarefa.descricao }}</p>
+                    <p>Prazo: {{ tarefa.prazo }}</p>
                 </div>
             {% endif %}
         {% endfor %}
-        <button type="submit" id="atualizarStatusBtn" onclick="atualizar_status()">Atualizar Status</button>
-        <button type="button" onclick="window.location.href='{% url 'criar_tarefa' %}'">+</button>
+        <button type="submit" id="atualizarStatusBtn">Atualizar Status</button>
+        <button type="button" onclick="window.location.href=`{% url 'criar_tarefa' %}`">+</button>
     </form>
 
     <h1>Concluídas:</h1>
     {% for tarefa in tarefas %}
         {% if tarefa.status == 'concluida' %}
-            <div class="tarefas_em_andamento" style="background-color: lightgreen; padding: 20px; margin-bottom: 20px">
-                <button type="button" onclick="window.location.href='{% url 'excluir_tarefa' tarefa.id %}'">&#128465;</button>
-                <button type="button" onclick="window.location.href='{% url 'editar_tarefa' tarefa.id %}'">&#9999;</button>
-                <p>{{ tarefa.materia }}</p>
-                <p>{{ tarefa.descricao }}</p>
-                <p>{{ tarefa.prazo }}</p>
+            <div class="tarefas_concluidas">
+                <button type="button" onclick="window.location.href=`{% url 'excluir_tarefa' tarefa.id %}`">Excluir</button>
+                <button type="button" onclick="window.location.href=`{% url 'editar_tarefa' tarefa.id %}`">Editar</button>
+                <p>Matéria: {{ tarefa.materia }}</p>
+                <p>Descrição: {{ tarefa.descricao }}</p>
+                <p>Prazo: {{ tarefa.prazo }}</p>
             </div>
         {% endif %}
     {% endfor %}
@@ -43,23 +109,21 @@
     <h1>Não feitas:</h1>
     {% for tarefa in tarefas %}
         {% if tarefa.status == 'nao_feita' %}
-            <div style="background-color: lightcoral; padding: 20px; margin-bottom: 20px">
-                <button type="button" onclick="window.location.href='{% url 'excluir_tarefa' tarefa.id %}'">&#128465;</button>
-                <button type="button" onclick="window.location.href='{% url 'editar_tarefa' tarefa.id %}'">&#9999;</button>
-                <p>{{ tarefa.materia }}</p>
-                <p>{{ tarefa.descricao }}</p>
-                <p>{{ tarefa.prazo }}</p>
+            <div class="tarefas_nao_feitas">
+                <button type="button" onclick="window.location.href=`{% url 'excluir_tarefa' tarefa.id %}`">Excluir</button>
+                <button type="button" onclick="window.location.href=`{% url 'editar_tarefa' tarefa.id %}`">Editar</button>
+                <p>Matéria: {{ tarefa.materia }}</p>
+                <p>Descrição: {{ tarefa.descricao }}</p>
+                <p>Prazo: {{ tarefa.prazo }}</p>
             </div>
         {% endif %}
     {% endfor %}
     
     <script>
-        document.getElementById('atualizarStatusBtn').addEventListener('click', function() {
-            // Garante que os checkboxes marcados sejam enviados
+        document.getElementById('atualizarStatusBtn').addEventListener('click', function(e) {
+            e.preventDefault();
             const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
             if (checkboxes.length > 0) {
-                // Se algum checkbox estiver marcado, o formulário será enviado
-                checkboxes.setAttribute('name', 'selecionado');
                 document.querySelector('form').submit();
             } else {
                 alert('Selecione ao menos uma tarefa para atualizar.');
