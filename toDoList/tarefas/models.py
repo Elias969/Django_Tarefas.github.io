@@ -48,3 +48,4 @@ class Tarefa(models.Model):
                 self.status = 'nao_feita'
 
         super().save(*args, **kwargs)
+

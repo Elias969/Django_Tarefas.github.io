@@ -69,9 +69,27 @@
         #atualizarStatusBtn:hover {
             background-color: #218838;
         }
+
+        /* Estilo para o botão de logout */
+        #logoutBtn {
+            background-color: #dc3545;
+            position: absolute;
+            top: 50px;
+            right: 35px;
+        }
+
+        #logoutBtn:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
+    <!-- Botão de Logout -->
+    <form action="{% url 'logout' %}" method="POST" style="text-align: right;">
+        {% csrf_token %}
+        <button type="submit" id="logoutBtn">Logout</button>
+    </form>
+
     <h1>Em andamento:</h1>
     <form method="POST" action="{% url 'atualizar_status' %}">
         {% csrf_token %}

@@ -68,7 +68,7 @@ def listar_tarefas(request):
     Exibe a lista de todas as tarefas.
     """
     atualizar_status_tarefas_expiradas()  # Atualiza status antes de listar
-    tarefas = Tarefa.objects.all()
+    tarefas = Tarefa.objects.filter(autor=request.user)
     return render(request, 'listar_tarefas.html', {'tarefas': tarefas})
 
 @login_required
@@ -91,7 +91,10 @@ def criar_tarefa(request):
     if request.method == 'POST':
         form = TarefaForm(request.POST)
         if form.is_valid():
-            form.save()  # Salva a nova tarefa no banco de dados
+            tarefa = form.save(commit=False)  # Não salva imediatamente
+            tarefa.autor = request.user  # Define o autor como o usuário logado
+            tarefa.save()  # Agora salva a tarefa no banco
+            
             return redirect('listar_tarefas')
     else:
         form = TarefaForm()
