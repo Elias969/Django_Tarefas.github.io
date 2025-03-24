@@ -118,17 +118,6 @@
             </div>
         {% endif %}
     {% endfor %}
-    
-    <script>
-        document.getElementById('atualizarStatusBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-            if (checkboxes.length > 0) {
-                document.querySelector('form').submit();
-            } else {
-                alert('Selecione ao menos uma tarefa para atualizar.');
-            }
-        });
-    </script>
+
 </body>
 </html>

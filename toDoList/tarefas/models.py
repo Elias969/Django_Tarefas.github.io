@@ -2,6 +2,7 @@ from django.db import models
 from datetime import datetime
 from django.utils import timezone
 from pytz import timezone as pytz_timezone
+from django.contrib.auth.models import User 
 
 class Tarefa(models.Model):
     STATUS_CHOICES = [
@@ -24,7 +25,8 @@ class Tarefa(models.Model):
     )
     
     criada_em = models.DateTimeField(auto_now_add=True)
-
+    autor = models.ForeignKey(User, on_delete=models.CASCADE)
+    
     def save(self, *args, **kwargs):
         fuso_brasilia = pytz_timezone('America/Sao_Paulo')  # Definindo o fuso horário de Brasília
         agora_brasilia = timezone.now().astimezone(fuso_brasilia)  # Garantir que a data seja no fuso correto
@@ -46,4 +48,3 @@ class Tarefa(models.Model):
                 self.status = 'nao_feita'
 
         super().save(*args, **kwargs)
-

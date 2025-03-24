@@ -4,6 +4,48 @@ from .forms import TarefaForm  # Assumindo que você tenha um formulário defini
 from django.utils.timezone import now
 from pytz import timezone
 from datetime import datetime
+from django.contrib.auth.models import User
+from django.contrib.auth import login, authenticate
+from django.contrib import messages
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+
+def cadastro(request):
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        email = request.POST.get('email')
+        senha = request.POST.get('password')
+
+        if nome and email and senha:
+            if User.objects.filter(email=email).exists():
+                return render(request, 'cadastro.html', {'error': 'E-mail já cadastrado'})
+            
+            user = User.objects.create_user(username=email, email=email, password=senha)
+            user.first_name = nome
+            user.save()
+
+            login(request, user)  # Faz login automaticamente após o cadastro
+            return redirect('listar_tarefas')  # Redireciona para a página principal
+
+    return render(request, 'cadastro.html')
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)  # Certifique-se de passar o 'user' aqui corretamente
+            return redirect("listar_tarefas/")
+        else:
+            return render(request, "login.html", {"error": "Credenciais inválidas"})
+    
+    return render(request, "login.html")
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('login')  # Redireciona para a página de login após o logout
 
 def atualizar_status_tarefas_expiradas():
     """
@@ -20,7 +62,7 @@ def atualizar_status_tarefas_expiradas():
     tarefas_expiradas = Tarefa.objects.filter(prazo__lt=agora_brasilia, status='em_andamento')
     tarefas_expiradas.update(status='nao_feita')
 
-
+@login_required
 def listar_tarefas(request):
     """
     Exibe a lista de todas as tarefas.
@@ -29,7 +71,7 @@ def listar_tarefas(request):
     tarefas = Tarefa.objects.all()
     return render(request, 'listar_tarefas.html', {'tarefas': tarefas})
 
-
+@login_required
 def atualizar_status(request):
     """
     Atualiza o status das tarefas selecionadas para 'concluída'.
@@ -41,7 +83,7 @@ def atualizar_status(request):
         return redirect('listar_tarefas')  # Recarrega a página após atualizar
     return redirect('listar_tarefas')
 
-
+@login_required
 def criar_tarefa(request):
     """
     Cria uma nova tarefa com base nos dados enviados pelo formulário.
@@ -55,7 +97,7 @@ def criar_tarefa(request):
         form = TarefaForm()
     return render(request, 'criar_tarefa.html', {'form': form})
 
-
+@login_required
 def excluir_tarefa(request, tarefa_id):
     """
     Exclui a tarefa especificada pelo ID.
@@ -64,7 +106,7 @@ def excluir_tarefa(request, tarefa_id):
     tarefa.delete()
     return redirect('listar_tarefas')
 
-
+@login_required
 def editar_tarefa(request, tarefa_id):
     """
     Edita os dados de uma tarefa existente.
@@ -80,10 +122,3 @@ def editar_tarefa(request, tarefa_id):
         form = TarefaForm(instance=tarefa)
 
     return render(request, 'editar_tarefa.html', {'form': form, 'tarefa': tarefa})
-
-
-def your_name(request, name):
-    """
-    Exibe uma página com o nome fornecido.
-    """
-    return render(request, 'yourname.html', {'name': name})
