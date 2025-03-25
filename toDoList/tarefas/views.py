@@ -9,6 +9,15 @@ from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth import get_user_model
+from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
+from django.urls import reverse_lazy
 
 def cadastro(request):
     if request.method == 'POST':
@@ -31,21 +40,54 @@ def cadastro(request):
 
 def login_view(request):
     if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Autenticar o usuário
         user = authenticate(request, username=username, password=password)
+
         if user is not None:
-            login(request, user)  # Certifique-se de passar o 'user' aqui corretamente
-            return redirect("listar_tarefas/")
+            login(request, user)
+            return redirect('listar_tarefas/')  # Redireciona para a página inicial ou dashboard
         else:
-            return render(request, "login.html", {"error": "Credenciais inválidas"})
-    
-    return render(request, "login.html")
+            messages.error(request, "Usuário ou senha inválidos.")
+    return render(request, 'login.html')
+
+def redefinir_senha(request):
+    if request.method == "POST":
+        username_or_email = request.POST.get('username_or_email')
+        senha_antiga = request.POST.get('senha_antiga')
+        nova_senha = request.POST.get('nova_senha')
+        confirmar_senha = request.POST.get('confirmar_senha')
+
+        # Verifica se as senhas nova e de confirmação são iguais
+        if nova_senha != confirmar_senha:
+            messages.error(request, "As senhas não coincidem.")
+            return redirect('redefinir_senha')
+
+        try:
+            # Verifica se o usuário existe pelo nome de usuário ou email
+            user = User.objects.get(username=username_or_email) if '@' not in username_or_email else User.objects.get(email=username_or_email)
+
+            # Verifica se a senha antiga está correta
+            if user.check_password(senha_antiga):
+                # Atualiza a senha do usuário
+                user.set_password(nova_senha)
+                user.save()
+                messages.success(request, "Senha redefinida com sucesso.")
+                return redirect('login')  # Redireciona de volta para a página de login
+            else:
+                messages.error(request, "Senha antiga incorreta.")
+        except User.DoesNotExist:
+            messages.error(request, "Usuário não encontrado.")
+
+    return render(request, 'login.html')
 
 @login_required
 def logout_view(request):
     logout(request)
     return redirect('login')  # Redireciona para a página de login após o logout
+
 
 def atualizar_status_tarefas_expiradas():
     """
