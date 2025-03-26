@@ -29,7 +29,7 @@ def cadastro(request):
             if User.objects.filter(email=email).exists():
                 return render(request, 'cadastro.html', {'error': 'E-mail já cadastrado'})
             
-            user = User.objects.create_user(username=email, email=email, password=senha)
+            user = User.objects.create_user(username=nome, email=email, password=senha)
             user.first_name = nome
             user.save()
 
