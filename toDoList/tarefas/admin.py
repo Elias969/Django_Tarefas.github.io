@@ -3,4 +3,4 @@ from .models import Tarefa
 
 @admin.register(Tarefa)
 class TarefaAdmin(admin.ModelAdmin):
-    list_display = ('materia', 'descricao', 'prazo', 'criada_em')
+    list_display = ('materia', 'descricao', 'prazo', 'criada_em', 'autor')
