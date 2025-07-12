@@ -48,7 +48,7 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            return redirect('listar_tarefas/')  # Redireciona para a página inicial ou dashboard
+            return redirect('listar_tarefas')  # Redireciona para a página inicial ou dashboard
         else:
             messages.error(request, "Usuário ou senha inválidos.")
     return render(request, 'login.html')
